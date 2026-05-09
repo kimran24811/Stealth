@@ -82,6 +82,10 @@ async def proxy_request(path: str, request: Request) -> Response:
     fwd_headers["origin"] = TARGET
     fwd_headers["referer"] = f"{TARGET}/dashboard"
 
+    # Send cookies as a raw Cookie header so domain-matching is bypassed entirely
+    if cookies:
+        fwd_headers["cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
+
     body = await request.body()
 
     async with httpx.AsyncClient(follow_redirects=True, timeout=30, headers={}) as client:
@@ -90,7 +94,6 @@ async def proxy_request(path: str, request: Request) -> Response:
                 method=request.method,
                 url=url,
                 headers=fwd_headers,
-                cookies=cookies,
                 content=body,
             )
         except httpx.RequestError as exc:
