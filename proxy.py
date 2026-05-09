@@ -31,7 +31,7 @@ _BASE_HEADERS = {
         "Chrome/124.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Encoding": "identity",  # force uncompressed so we can rewrite and forward cleanly
     "DNT": "1",
     "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
     "sec-ch-ua-mobile": "?0",
@@ -84,7 +84,7 @@ async def proxy_request(path: str, request: Request) -> Response:
 
     body = await request.body()
 
-    async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
+    async with httpx.AsyncClient(follow_redirects=True, timeout=30, headers={}) as client:
         try:
             resp = await client.request(
                 method=request.method,
