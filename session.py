@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from urllib.parse import unquote
 
 COOKIES_FILE = "manual_cookies.json"
 
@@ -13,9 +14,10 @@ def get_cookies() -> dict:
             data = json.load(f)
         # Support browser-exported list format: [{name, value, ...}, ...]
         if isinstance(data, list):
-            return {c["name"]: c["value"] for c in data if "name" in c and "value" in c}
+            # URL-decode values — Cookie-Editor exports them encoded (%2B → +, %3D → =)
+            return {c["name"]: unquote(c["value"]) for c in data if "name" in c and "value" in c}
         if isinstance(data, dict):
-            return data
+            return {k: unquote(v) for k, v in data.items()}
     except Exception:
         pass
     return {}
