@@ -1,6 +1,6 @@
 import asyncio
+import re
 import time
-from urllib.parse import urljoin
 
 import httpx
 from fastapi import Request
@@ -48,13 +48,21 @@ def _is_static(path: str) -> bool:
     return any(path.split("?")[0].endswith(ext) for ext in _STATIC_EXTS)
 
 
-def _rewrite_html(html: str, base_url: str) -> str:
-    """Replace absolute stealthwriter URLs so they route through our proxy."""
-    return (
-        html
-        .replace("https://app.stealthwriter.ai", "")
-        .replace("http://app.stealthwriter.ai", "")
+def _rewrite_html(html: str) -> str:
+    # Point /_next/ static assets directly at StealthWriter so the browser
+    # fetches them from the real server (our proxy gets 404 for those files).
+    html = re.sub(
+        r'(src|href|srcSet)=(["\'])(\/_next\/)',
+        rf'\1=\2{TARGET}\3',
+        html,
     )
+    # Also fix any JS string references like "/_next/
+    html = html.replace('"/_next/', f'"{TARGET}/_next/')
+    html = html.replace("'/_next/", f"'{TARGET}/_next/")
+    # Keep absolute StealthWriter links for pages routing through the proxy
+    html = html.replace("https://app.stealthwriter.ai", "")
+    html = html.replace("http://app.stealthwriter.ai", "")
+    return html
 
 
 async def proxy_request(path: str, request: Request) -> Response:
@@ -103,7 +111,7 @@ async def proxy_request(path: str, request: Request) -> Response:
     media_type = resp.headers.get("content-type", "application/octet-stream")
 
     if "text/html" in media_type:
-        content = _rewrite_html(content.decode("utf-8", errors="replace"), url).encode("utf-8")
+        content = _rewrite_html(content.decode("utf-8", errors="replace")).encode("utf-8")
 
     resp_headers = {
         k: v for k, v in resp.headers.items()
