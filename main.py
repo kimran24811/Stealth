@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 import uvicorn
 
+import httpx
 from proxy import proxy_request
-from session import check_session, save_cookies
+from session import check_session, save_cookies, get_cookies
 
 app = FastAPI(title="StealthWriter Proxy", docs_url=None, redoc_url=None)
 
@@ -25,6 +26,21 @@ app.add_middleware(
 @app.get("/session-status")
 async def session_status():
     return check_session()
+
+
+@app.get("/debug-auth")
+async def debug_auth():
+    """Check if our cookies are accepted by StealthWriter's auth system."""
+    cookies = get_cookies()
+    cookie_header = "; ".join(f"{k}={v}" for k, v in cookies.items())
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "cookie": cookie_header,
+        "Accept": "application/json",
+    }
+    async with httpx.AsyncClient(follow_redirects=True, timeout=15) as client:
+        r = await client.get("https://app.stealthwriter.ai/api/auth/get-session", headers=headers)
+    return {"status": r.status_code, "body": r.text[:1000]}
 
 
 @app.post("/update-cookies")
