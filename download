@@ -1,0 +1,7 @@
+API_KEY=2h8fA1JkKzQwXy9pL3sT5vG7bR0cV2eP4d6fH8jK1lM3nO5qR7tU9wXyZ1aS3dF
+TARGET_URL=https://app.stealthwriter.ai/
+AWS_REGION=us-east-1
+SSM_PARAMETER_PATH=/stealthwriter-ai/proxy/
+SESSION_TIMEOUT=3600
+SELENIUM_HEADLESS=false
+DISPLAY=:99
