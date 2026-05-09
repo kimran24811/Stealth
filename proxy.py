@@ -14,6 +14,7 @@ TARGET = "https://app.stealthwriter.ai"
 _DROP_REQUEST_HEADERS = {
     "host", "content-length", "transfer-encoding", "connection",
     "keep-alive", "upgrade", "te", "trailers", "proxy-authorization",
+    "accept-encoding",  # let httpx handle decompression transparently
 }
 
 # Headers to strip from the target's response before returning to the client
