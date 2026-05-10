@@ -1,4 +1,3 @@
-import asyncio
 import re
 import time
 
@@ -6,60 +5,74 @@ import httpx
 from fastapi import Request
 from fastapi.responses import Response
 
-from session import get_cookies
+from session import get_cookies, save_cookies
 
 TARGET = "https://app.stealthwriter.ai"
 
-# Headers to strip before forwarding to the target
 _DROP_REQUEST_HEADERS = {
     "host", "content-length", "transfer-encoding", "connection",
     "keep-alive", "upgrade", "te", "trailers", "proxy-authorization",
-    "accept-encoding",  # let httpx handle decompression transparently
+    "accept-encoding",
 }
 
-# Headers to strip from the target's response before returning to the client
 _DROP_RESPONSE_HEADERS = {
     "content-encoding", "transfer-encoding", "content-length",
     "connection", "server", "x-frame-options", "content-security-policy",
 }
 
-# Browser-like headers to attach to every forwarded request
 _BASE_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "Chrome/147.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "identity",  # force uncompressed so we can rewrite and forward cleanly
+    "Accept-Encoding": "identity",
     "DNT": "1",
-    "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    "sec-ch-ua": '"Google Chrome";v="147", "Chromium";v="147", "Not-A.Brand";v="99"',
     "sec-ch-ua-mobile": "?0",
     "sec-ch-ua-platform": '"Windows"',
 }
 
-# Simple in-memory cache: url -> (content, status, headers, media_type, expires_at)
 _cache: dict[str, tuple] = {}
 _STATIC_EXTS = {".js", ".css", ".png", ".jpg", ".jpeg", ".ico", ".woff", ".woff2", ".svg", ".gif", ".ttf"}
-_CACHE_TTL = 600  # 10 minutes for static assets
+_CACHE_TTL = 600
 
 
 def _is_static(path: str) -> bool:
     return any(path.split("?")[0].endswith(ext) for ext in _STATIC_EXTS)
 
 
+def _capture_auth_cookies(resp: httpx.Response):
+    """If StealthWriter sets session cookies (e.g. after login), save them so
+    subsequent requests are authenticated automatically."""
+    new_cookies = {}
+    for value in resp.headers.get_list("set-cookie"):
+        parts = value.split(";")
+        if not parts:
+            continue
+        name_value = parts[0].strip()
+        if "=" not in name_value:
+            continue
+        name, val = name_value.split("=", 1)
+        name = name.strip()
+        val = val.strip()
+        # Capture any auth/session cookies StealthWriter issues
+        if any(kw in name.lower() for kw in ("session", "auth", "token")):
+            new_cookies[name] = val
+
+    if new_cookies:
+        existing = get_cookies()
+        existing.update(new_cookies)
+        save_cookies(existing)
+
+
 def _rewrite_html(html: str) -> str:
-    # Point /_next/ static assets directly at StealthWriter so the browser
-    # fetches them from the real server (our proxy gets 404 for those files).
-    html = re.sub(
-        r'(src|href|srcSet)=(["\'])(\/_next\/)',
-        rf'\1=\2{TARGET}\3',
-        html,
-    )
-    # Also fix any JS string references like "/_next/
+    # Load /_next/ static assets directly from StealthWriter (our proxy gets 404 for them)
+    html = re.sub(r'(src|href|srcSet)=(["\'])(\/_next\/)', rf'\1=\2{TARGET}\3', html)
     html = html.replace('"/_next/', f'"{TARGET}/_next/')
     html = html.replace("'/_next/", f"'{TARGET}/_next/")
-    # Keep absolute StealthWriter links for pages routing through the proxy
+    # Remove the host from absolute StealthWriter page links so they route through our proxy
     html = html.replace("https://app.stealthwriter.ai", "")
     html = html.replace("http://app.stealthwriter.ai", "")
     return html
@@ -72,7 +85,7 @@ async def proxy_request(path: str, request: Request) -> Response:
     if request.url.query:
         url += f"?{request.url.query}"
 
-    # Serve from cache for static assets
+    # Cache for static assets
     if request.method == "GET" and _is_static(path):
         cached = _cache.get(url)
         if cached:
@@ -81,7 +94,7 @@ async def proxy_request(path: str, request: Request) -> Response:
                 return Response(content=content, status_code=status, headers=headers, media_type=media_type)
             del _cache[url]
 
-    # Build forwarded headers
+    # Build request headers
     fwd_headers = {**_BASE_HEADERS}
     for k, v in request.headers.items():
         if k.lower() not in _DROP_REQUEST_HEADERS:
@@ -90,7 +103,7 @@ async def proxy_request(path: str, request: Request) -> Response:
     fwd_headers["origin"] = TARGET
     fwd_headers["referer"] = f"{TARGET}/dashboard"
 
-    # Send cookies as a raw Cookie header so domain-matching is bypassed entirely
+    # Force all cookies into a single Cookie header (bypasses httpx domain matching)
     if cookies:
         fwd_headers["cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
@@ -107,6 +120,9 @@ async def proxy_request(path: str, request: Request) -> Response:
         except httpx.RequestError as exc:
             return Response(content=f"Proxy connection error: {exc}", status_code=502)
 
+    # Auto-save any session cookies StealthWriter sets (e.g. after login)
+    _capture_auth_cookies(resp)
+
     content = resp.content
     media_type = resp.headers.get("content-type", "application/octet-stream")
 
@@ -117,19 +133,15 @@ async def proxy_request(path: str, request: Request) -> Response:
         k: v for k, v in resp.headers.items()
         if k.lower() not in _DROP_RESPONSE_HEADERS
     }
-    # Rewrite redirect locations so they stay on our proxy
     if "location" in resp_headers:
         resp_headers["location"] = resp_headers["location"].replace(TARGET, "")
 
-    response = Response(
+    if request.method == "GET" and _is_static(path) and resp.status_code == 200:
+        _cache[url] = (content, resp.status_code, dict(resp_headers), media_type, time.time() + _CACHE_TTL)
+
+    return Response(
         content=content,
         status_code=resp.status_code,
         headers=resp_headers,
         media_type=media_type,
     )
-
-    # Cache successful static asset responses
-    if request.method == "GET" and _is_static(path) and resp.status_code == 200:
-        _cache[url] = (content, resp.status_code, dict(resp_headers), media_type, time.time() + _CACHE_TTL)
-
-    return response
