@@ -68,11 +68,7 @@ def _capture_auth_cookies(resp: httpx.Response):
 
 
 def _rewrite_html(html: str) -> str:
-    # Load /_next/ static assets directly from StealthWriter (our proxy gets 404 for them)
-    html = re.sub(r'(src|href|srcSet)=(["\'])(\/_next\/)', rf'\1=\2{TARGET}\3', html)
-    html = html.replace('"/_next/', f'"{TARGET}/_next/')
-    html = html.replace("'/_next/", f"'{TARGET}/_next/")
-    # Remove the host from absolute StealthWriter page links so they route through our proxy
+    # Route all absolute StealthWriter links through our proxy
     html = html.replace("https://app.stealthwriter.ai", "")
     html = html.replace("http://app.stealthwriter.ai", "")
     return html
