@@ -1,0 +1,238 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: #fff;
+  padding: 20px 40px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #5b6af0;
+}
+
+.tagline {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+main {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Upload Area */
+.upload-area {
+  background: #fff;
+  border: 2px dashed #5b6af0;
+  border-radius: 16px;
+  padding: 50px 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-area.dragover {
+  background: #eef0ff;
+}
+
+.upload-icon { font-size: 3rem; margin-bottom: 12px; }
+
+.upload-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.upload-sub { color: #aaa; margin-bottom: 16px; font-size: 0.9rem; }
+
+.upload-limit { color: #aaa; font-size: 0.82rem; margin-top: 12px; }
+
+/* Buttons */
+.btn-primary {
+  background: #5b6af0;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: #4a58d4; }
+
+.btn-danger-outline {
+  background: transparent;
+  color: #e74c3c;
+  border: 1.5px solid #e74c3c;
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-danger-outline:hover { background: #e74c3c; color: #fff; }
+
+/* Progress */
+.progress-wrap {
+  margin-top: 16px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  height: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #5b6af0;
+  width: 0%;
+  transition: width 0.2s;
+  border-radius: 8px;
+}
+
+#progressText {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Status */
+.status-msg {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  min-height: 20px;
+  font-weight: 500;
+}
+.status-msg.success { color: #27ae60; }
+.status-msg.error { color: #e74c3c; }
+
+/* Files header */
+.files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 36px;
+  margin-bottom: 16px;
+}
+
+.files-header h2 { font-size: 1.3rem; }
+
+.file-count {
+  background: #5b6af0;
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+/* File Grid */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.file-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform 0.15s;
+}
+
+.file-card:hover { transform: translateY(-2px); }
+
+.file-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+.file-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+.file-age {
+  font-size: 0.72rem;
+  color: #bbb;
+  margin-bottom: 12px;
+}
+
+.file-actions { display: flex; gap: 8px; justify-content: center; }
+
+.btn-download {
+  background: #5b6af0;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-download:hover { background: #4a58d4; }
+
+.btn-delete {
+  background: transparent;
+  color: #e74c3c;
+  border: 1.5px solid #e74c3c;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-delete:hover { background: #e74c3c; color: #fff; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  color: #bbb;
+  margin-top: 40px;
+  font-size: 0.95rem;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #bbb;
+  font-size: 0.82rem;
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+@media (max-width: 500px) {
+  header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .file-grid { grid-template-columns: 1fr 1fr; }
+}

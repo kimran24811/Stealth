@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuickShare</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">⚡ QuickShare</div>
+    <p class="tagline">Share files instantly with anyone on your WiFi</p>
+  </header>
+
+  <main>
+    <!-- Upload Area -->
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" hidden />
+      <div class="upload-icon">📁</div>
+      <p class="upload-text">Drag & drop a file here</p>
+      <p class="upload-sub">or</p>
+      <button class="btn-primary" onclick="document.getElementById('fileInput').click()">Choose File</button>
+      <p class="upload-limit">Max file size: 20MB</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-bar" id="progressBar"></div>
+      <span id="progressText">0%</span>
+    </div>
+
+    <!-- Status message -->
+    <div class="status-msg" id="statusMsg"></div>
+
+    <!-- Files Section -->
+    <div class="files-header" id="filesHeader" style="display:none">
+      <h2>Files <span class="file-count" id="fileCount"></span></h2>
+      <button class="btn-danger-outline" onclick="deleteAll()">Delete All</button>
+    </div>
+
+    <div class="file-grid" id="fileGrid"></div>
+
+    <div class="empty-state" id="emptyState">
+      <p>No files yet. Upload a file to share it with devices on your WiFi.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Files auto-delete after 2 hours &nbsp;·&nbsp; Max 20MB per file</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
