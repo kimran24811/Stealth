@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AirForShare — Instant WiFi File Sharing</title>
+  <meta name="description" content="Share files instantly with anyone on your WiFi. No login, no app, no cables." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      AirForShare
+    </div>
+    <div class="header-right">
+      <span class="badge">Free</span>
+      <span class="header-sub">No login &nbsp;·&nbsp; No app &nbsp;·&nbsp; Just share</span>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="hero">
+      <h1>Share files with any device<br>on your <span class="highlight">WiFi</span></h1>
+      <p class="hero-sub">Upload a file — anyone on the same network can download it instantly.</p>
+    </div>
+
+    <!-- Upload Area -->
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" hidden />
+      <div class="upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </div>
+      <p class="upload-text">Drag &amp; drop your file here</p>
+      <p class="upload-sub">or</p>
+      <button class="btn-primary" onclick="document.getElementById('fileInput').click()">Choose File</button>
+      <p class="upload-limit">&#128274; Max 20MB &nbsp;·&nbsp; Auto-deleted after 2 hours</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <span id="progressText">Uploading... 0%</span>
+    </div>
+
+    <!-- Status message -->
+    <div class="status-msg" id="statusMsg"></div>
+
+    <!-- Files Section -->
+    <div class="files-section" id="filesSection" style="display:none">
+      <div class="files-header">
+        <div class="files-title">
+          <h2>Shared Files</h2>
+          <span class="file-count" id="fileCount">0</span>
+        </div>
+        <button class="btn-danger-outline" onclick="deleteAll()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Delete All
+        </button>
+      </div>
+      <div class="file-grid" id="fileGrid"></div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#d0d0e8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <p>No files yet</p>
+      <span>Upload a file to share it with devices on your WiFi</span>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-it-works">
+      <h3>How it works</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <p>Upload a file from any device</p>
+        </div>
+        <div class="step-arrow">&#8594;</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <p>Open this site on another device on the same WiFi</p>
+        </div>
+        <div class="step-arrow">&#8594;</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <p>Download the file instantly — no login needed</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>AirForShare &nbsp;·&nbsp; Files auto-delete after 2 hours &nbsp;·&nbsp; Max 20MB per file &nbsp;·&nbsp; Free forever</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
