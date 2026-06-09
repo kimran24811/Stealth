@@ -5,7 +5,7 @@ const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
 const statusMsg = document.getElementById('statusMsg');
 const fileGrid = document.getElementById('fileGrid');
-const filesHeader = document.getElementById('filesHeader');
+const filesHeader = document.getElementById('filesSection');
 const fileCount = document.getElementById('fileCount');
 const emptyState = document.getElementById('emptyState');
 
