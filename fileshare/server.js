@@ -39,7 +39,7 @@ const upload = multer({
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, process.env.STATIC_DIR || 'public')));
 
 // Get files for this IP
 app.get('/api/files', (req, res) => {
